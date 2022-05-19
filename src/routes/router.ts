@@ -1,10 +1,9 @@
 import express from 'express'
 import SmartContractService from "../services/smartContract";
 const router = express.Router()
-const service = new SmartContractService()
 
 router.get('/products', (req, res) => {
-    service.getProducts()
+    SmartContractService.getProducts()
         .then((products) => {
             console.log(products)
             res.send({
