@@ -7,6 +7,7 @@ class SmartContractService {
     #smartContract: any;
     #web3: any;
     #account: any;
+    #wallet: any;
 
     constructor() {
         this.init().catch(err => console.error(err))
@@ -18,6 +19,9 @@ class SmartContractService {
 
         // Create account
         this.createAccount()
+
+        // Create wallet
+        this.createWallet()
 
         // Fetch ABI and initialize contract
         const abiResult = await this.getABI().catch((err) => {
@@ -49,21 +53,33 @@ class SmartContractService {
     getProducts = async (): Promise<Product[]> => {
         let products: Product[] = []
 
-        // TODO this is not working. The result is the error Invalid JSON RPC response
-        const totalOfProducts: number = await this.#smartContract.methods.size().call()
+        // TODO this is not working. The result is the error: Returned values aren't valid, did it run Out of Gas?
 
-        for (let i = 0; i < totalOfProducts; i++) {
-            const product: Product = await this.#smartContract.methods.products(i).call().catch((err) => {
-                return Promise.reject(err)
-            })
-            products.push(product)
-        }
+        const totalOfProducts = await this.#smartContract.methods.size().call()
+
+         for (let i = 0; i < totalOfProducts; i++) {
+             this.#smartContract.methods.products(i).call()
+                 .then((product: Product) => {
+                     console.log("Response: ", product)
+                     products.push(product)
+                 })
+                 .catch(console.error)
+         }
 
         return Promise.resolve(products)
     }
 
     private createAccount = () => {
         this.#account = this.#web3.eth.accounts.create()
+    }
+
+    private createWallet = () => {
+        this.#web3.eth.accounts.wallet.create(1)
+        this.#wallet = this.#web3.eth.accounts.wallet.add({privateKey: this.#account.privateKey, address: this.#account.address})
+    }
+
+    createProduct = (name: string) => {
+        return this.#smartContract.methods.createProduct(name).send({from: this.#wallet.address})
     }
 }
 

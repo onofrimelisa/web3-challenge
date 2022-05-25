@@ -2,14 +2,14 @@ import express from 'express'
 import SmartContractService from "../services/smartContract";
 const router = express.Router()
 
-// swagger config
+// Swagger config
 const swaggerUi = require('swagger-ui-express')
 const swaggerFile = require('../../docs/swaggerDoc.json')
 
 /**
  * GET /products
- * @summary Calls Policy Agent evaluate endpoint
- * @tags Policy Agent Client
+ * @summary Get all the products with their details
+ * @tags Products
  */
 router.get('/products', (req, res) => {
     SmartContractService.getProducts()
@@ -28,6 +28,16 @@ router.get('/products', (req, res) => {
                 err
             })
         })
+})
+
+/**
+ * POST /products
+ * @summary Create a product from a wallet
+ * @tags Products
+ */
+router.post('/products', (req, res) => {
+    SmartContractService.createProduct("test")
+    res.send()
 })
 
 // Swagger endpoints
